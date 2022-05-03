@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { right } from "../Keyframes/Keyframe";
 import axios from "axios";
-import { FormProvider } from "react-hook-form";
 
 const API = "http://localhost:5000/public";
 
@@ -42,23 +41,23 @@ const SideModal = (props) => {
   };
 
   return (
-    <Container
-      style={style}
-      animate={right}
-      onMouseLeave={() => props.setDisplay("none")}
-    >
+    <Container style={style} animate={right}>
       <Card>
         <Span onClick={() => props.setDisplay("none")}>&times;</Span>
         <Col>
           <div>
             <p>Description</p>
-
             <ul>
               {handleFormat()?.length > 0 &&
                 handleFormat()?.map((item) => <li>{Object?.keys(item)[0]}</li>)}
-              {props.data?.test_information?.map((item, index) => (
-                <li key={index}>{item.description + item.number}</li>
-              ))}
+              {props.data?.test_information?.map(
+                (item, index) =>
+                  item.file && (
+                    <li key={index}>
+                      {item.description + " " + item.batch_no}
+                    </li>
+                  )
+              )}
             </ul>
           </div>
           <div>
@@ -75,18 +74,21 @@ const SideModal = (props) => {
                     </button>
                   </li>
                 ))}
-              {props.data?.test_information?.map((item, index) => (
-                <li key={index}>
-                  <button
-                    onClick={() => viewHandler(item.file)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="viewPoints"
-                  >
-                    {item.filename}
-                  </button>
-                </li>
-              ))}
+              {props.data?.test_information?.map(
+                (item, index) =>
+                  item.file && (
+                    <li key={index}>
+                      <button
+                        onClick={() => viewHandler(item.file)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="viewPoints"
+                      >
+                        {item.filename}
+                      </button>
+                    </li>
+                  )
+              )}
             </ul>
           </div>
         </Col>
@@ -106,9 +108,9 @@ const Container = styled.div`
   right: 0;
   overflow: auto; /* Enable scroll if needed */
   color: white;
-  font-weight: 500;
-  font-size: 18px;
-  letter-spacing: 0.1rem;
+  min-height: 400px;
+  // font-weight: 500;
+  font-size: 14px;
   background-color: white;
   animation: ${(props) => props.animate} 2s;
   animation-direction: reverse;
@@ -118,7 +120,7 @@ const Card = styled.div`
   margin: 0 auto;
   padding: 30px;
   border: 2px solid #white;
-  min-width: 500px;
+  max-width: 800px;
   width: 100%;
   align-items: center;
   position: relative;
@@ -133,14 +135,26 @@ const Card = styled.div`
     li {
       list-style: none;
       margin: 10px 0;
+      border-bottom: solid 2px whitesmoke;
+      min-height: 50px;
     }
+  }
+
+  button {
+    font-size: 12px;
+    background-color: inherit;
+    border: none;
+    text-decoration: underline;
+    text-decoration-color: blue;
+    cursor: pointer;
   }
 `;
 
 const Col = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-gap: 20px;
+  grid-gap: 10px;
+  max-width: 500px;
 `;
 
 const Span = styled.span`

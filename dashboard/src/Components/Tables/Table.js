@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import PaginationFront from "../Pagination/PaginationFront";
 import { useSortableData } from "../utils/useSortableData";
 
-let PageSize = 5;
+let PageSize = 10;
 
 const Table = ({ data, currentUser }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -179,11 +179,10 @@ const Table = ({ data, currentUser }) => {
         <PaginationFront
           className="pagination-bar"
           currentPage={currentPage}
-          totalCount={items?.length}
+          totalCount={currentTableData?.length}
           pageSize={PageSize}
           onPageChange={(page) => setCurrentPage(page)}
         />
-        {/* <Pagination pager={pager} /> */}
       </PaginationContainer>
     </Container>
   );

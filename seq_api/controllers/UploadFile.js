@@ -75,14 +75,22 @@ router.post(
 
     //update  the state
     let results = [];
-    for (let i = 0; i < req.body.reportNo.length; i++) {
-      // create an object
+    // first check if report length is given
+    if (typeof req.body.reportNo === "string") {
       let obj = {};
-      obj[req.body.testname[i]] = reqFiles[i] === undefined ? "" : reqFiles[i];
+      obj[req.body.testname] = reqFiles[0] === undefined ? "" : reqFiles[0];
       results.push(obj);
+    } else {
+      for (let i = 0; i < req.body.reportNo.length; i++) {
+        // create an object
+        let obj = {};
+        obj[req.body.testname[i]] =
+          reqFiles[i] === undefined ? "" : reqFiles[i];
+        results.push(obj);
+      }
     }
 
-    if (reqFiles.length > 0) {
+    if (reqFiles.length > 1) {
       const testInfo = await models.TestSchedule.findOne({
         where: { reportNo: req.body.reportNo[0] },
       });
@@ -91,6 +99,19 @@ router.post(
         const updateState = await models.TestSchedule.update(
           { files: results },
           { where: { reportNo: req.body.reportNo[0] } }
+        );
+
+        res.status(200).json(updateState);
+      }
+    } else if (reqFiles.length <= 1 && reqFiles.length > 0) {
+      const testInfo = await models.TestSchedule.findOne({
+        where: { reportNo: req.body.reportNo },
+      });
+
+      if (testInfo) {
+        const updateState = await models.TestSchedule.update(
+          { files: results },
+          { where: { reportNo: req.body.reportNo } }
         );
 
         res.status(200).json(updateState);

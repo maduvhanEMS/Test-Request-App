@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import { appendErrors, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../Loader/Loader";
 import { updateTestInformation } from "../../features/test_information/testInformationSlice";
@@ -136,14 +136,12 @@ const BookInTable = ({ data, handleClick }) => {
     }
   }, [testInformation]);
 
-  // useEffect(() => {
-  //   console.log(text);
-  //   if (isUpdated && text) {
-  //     toast.success("Successfully updated");
-  //     dispatch(resetTestsScheduleUpadte());
-  //     navigate("/bookin");
-  //   }
-  // }, [isUpdated, navigate, dispatch, text]);
+  useEffect(() => {
+    if (isUpdated && text) {
+      toast.success("Samples Successfully booked in");
+      dispatch(resetTestsScheduleUpadte());
+    }
+  }, [isUpdated, navigate, dispatch, text]);
 
   const tests = () => {
     let modifiedTest;
@@ -159,8 +157,6 @@ const BookInTable = ({ data, handleClick }) => {
     }
     return modifiedTest;
   };
-
-  console.log(testInformation);
 
   const onSubmitValues = (e) => {
     const { value } = e.target;

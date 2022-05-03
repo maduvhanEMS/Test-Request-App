@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   getTestSchedule,
   updateTestSchedule,
@@ -19,6 +20,7 @@ const ScheduleModal = ({ setDisplay, reportNo }) => {
     start: "",
     status: "",
   });
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
 
@@ -49,6 +51,8 @@ const ScheduleModal = ({ setDisplay, reportNo }) => {
     };
     dispatch(updateTestSchedule(testData));
     setInitalState({ question: "", id: "", title: "", start: "" });
+    setDisplay("none");
+    navigate("/bookin");
   };
 
   return (

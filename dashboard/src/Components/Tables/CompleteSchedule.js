@@ -12,40 +12,54 @@ const CompleteSchedule = ({ data, id }) => {
   const [testName, setTestName] = useState([]);
   const [files, setFiles] = useState([]);
   const [formFileData, setFormFileData] = useState([]);
+  const [exist, setExist] = useState(false);
 
   const dispatch = useDispatch();
 
+  console.log(data);
+
   useEffect(() => {
     let initialState = [];
+    let test_data;
     if (data?.test_information?.length > 0) {
-      for (let i = 0; i < data.test_information.length; i++) {
-        let obj = {};
-        obj["id"] = data.test_information[i].id;
-        obj["file"] = data.test_information[i].file;
-        obj["reportNo"] = data.reportNo;
-        obj["fileName"] = data.test_information[i].filename;
-        initialState.push(obj);
-      }
-      setFormFileData(initialState);
+      test_data = data?.test_information;
+    } else if (data?.CC_info?.length > 0) {
+      test_data = data?.CC_info;
     }
+
+    for (let i = 0; i < test_data?.length; i++) {
+      let obj = {};
+      obj["id"] = test_data[i].id;
+      obj["file"] = test_data[i].file;
+      obj["reportNo"] = data.reportNo;
+      obj["fileName"] = test_data[i].filename;
+      initialState.push(obj);
+    }
+    setFormFileData(initialState);
   }, [data]);
 
-  const mainTest = ["Dynamic Vivacity", "Burn rate", "Bulk Density"];
-
   useEffect(() => {
+    const mainTest = [
+      "Dynamic Vivacity",
+      "Burn rate",
+      "Bulk Density",
+      "Burn Time",
+      "Scroll Test",
+    ];
     if (testName.length === 0) {
       const jsonTest = data?.tests?.map((item) => JSON.parse(item));
       if (jsonTest?.length > 0) {
         jsonTest.map((item) => {
           const key = Object.keys(item)[0];
           if (mainTest.includes(key) && Object.values(item)[0]) {
-            console.log(Object.values(item)[0]);
             setTestName((prevState) => [...prevState, key]);
+          } else if (key === "Physical Dimension") {
+            setExist(true);
           }
         });
       }
     }
-  }, [data]);
+  }, [data, testName]);
 
   useEffect(() => {
     const testFiles =
@@ -55,7 +69,6 @@ const CompleteSchedule = ({ data, id }) => {
     if (testFiles?.length > 0) {
       setFiles(testFiles);
     } else {
-      console.log("withiin", testName);
       const names = testName.reduce(
         (options, option) => [
           ...options,
@@ -74,12 +87,14 @@ const CompleteSchedule = ({ data, id }) => {
   useEffect(() => {
     const checkbox = [];
 
-    if (formFileData !== 0) {
-      formFileData.map((item) => {
-        if (item["file"] === "") {
-          checkbox.push(item["file"]);
-        }
-      });
+    if (exist) {
+      if (formFileData !== 0) {
+        formFileData.map((item) => {
+          if (item["file"] === "" || item["file"] === null) {
+            checkbox.push(item["file"]);
+          }
+        });
+      }
     }
 
     if (files.length > 0) {
@@ -96,6 +111,8 @@ const CompleteSchedule = ({ data, id }) => {
       setCheck(false);
     }
   }, [formFileData, files]);
+
+  // console.log(formFileData);
 
   const onChange = (e) => {
     const { name } = e.target;
@@ -144,7 +161,7 @@ const CompleteSchedule = ({ data, id }) => {
     }
   };
 
-  const uploaDReport = async (e) => {
+  const uploadReport = async (e) => {
     let formData = new FormData();
     for (const file of files) {
       formData.append("file", Object.values(file)[0]);
@@ -174,14 +191,14 @@ const CompleteSchedule = ({ data, id }) => {
     // dispatch(updateTestInformation({ reportNo: data.reportNo, formFileData }));
     // dispatch(updateTestSchedule({ reportNo: data.reportNo, files }));
     upload();
-    uploaDReport();
+    uploadReport();
   };
 
   const onSubmit = (e) => {
     alert("Thank you Bossman");
     e.preventDefault();
     // dispatch(updateTestInformation({ reportNo: data.reportNo, formFileData }));
-    uploaDReport();
+    uploadReport();
     dispatch(
       updateTestSchedule({
         reportNo: data.reportNo,
@@ -189,6 +206,8 @@ const CompleteSchedule = ({ data, id }) => {
       })
     );
   };
+
+  console.info(testName, "Information");
 
   return (
     <Container>
@@ -208,9 +227,9 @@ const CompleteSchedule = ({ data, id }) => {
               return (
                 <TableTr key={item}>
                   <Tbody>
-                    {data.reportNo + " " + data?.product.product_name}
+                    {data.reportNo + " - " + data?.products.join(" & ")}
                   </Tbody>
-                  <Tbody> {data?.name}</Tbody>
+                  <Tbody> {data?.test?.facility_name}</Tbody>
                   <Tbody>{item}</Tbody>
                   <Tbody>
                     <form>
@@ -235,8 +254,8 @@ const CompleteSchedule = ({ data, id }) => {
             })}
           </>
           {data?.test_information?.map((item, index) => {
-            const { description, number, id } = item;
-            const jsonData = data?.tests.map((item) => JSON.parse(item));
+            const { description, number, id, batch_no } = item;
+            const jsonData = data?.tests?.map((item) => JSON.parse(item));
             const vivacity = jsonData.find((item) => {
               if (
                 Object.keys(item)[0] === "Physical Dimensions" &&
@@ -247,7 +266,7 @@ const CompleteSchedule = ({ data, id }) => {
             return (
               vivacity && (
                 <TableTr key={index}>
-                  <Tbody>{description + number}</Tbody>
+                  <Tbody>{description + " - " + batch_no}</Tbody>
                   <Tbody> {data?.test?.facility_name}</Tbody>
                   <Tbody>{vivacity ? Object.keys(vivacity)[0] : ""}</Tbody>
                   <Tbody>

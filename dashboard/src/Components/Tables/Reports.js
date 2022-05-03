@@ -8,6 +8,7 @@ let PageSize = 10;
 
 const ReportsTable = ({ data, setCurrentId, setDisplay }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [open, setOpen] = useState(0);
 
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PageSize;
@@ -58,7 +59,9 @@ const ReportsTable = ({ data, setCurrentId, setDisplay }) => {
               }
 
               const testInfo = test_information.map((item) =>
-                item.Received === "true" ? item.description + item.number : null
+                item.Received === "true"
+                  ? item.description + " " + item.batch_no
+                  : null
               );
               const testInfoData = testInfo
                 .filter((item) => {
@@ -72,7 +75,9 @@ const ReportsTable = ({ data, setCurrentId, setDisplay }) => {
                   <Tbody>{product.product_name}</Tbody>
                   <Tbody>{test.facility_name}</Tbody>
                   <Tbody>{modifiedTest}</Tbody>
-                  <Tbody>{testInfoData} </Tbody>
+                  <Tbody style={{ maxWidth: "100px" }}>
+                    {testInfoData.substring(0, 100)}{" "}
+                  </Tbody>
                   <Tbody>{moment(createdAt).fromNow()}</Tbody>
                   <Tbody>
                     <Button onClick={() => handleChange(reportNo)}>

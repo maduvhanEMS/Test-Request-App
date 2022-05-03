@@ -29,8 +29,12 @@ const List = ({ events, handleClick }) => {
             {item.title}{" "}
             {checked[index] && (
               <ButtonContainer>
-                <Button to={`/schedule/com/${item.reportNo}`} color></Button>
-                <UpdateB onClick={() => handleClick(item.id)}></UpdateB>
+                <Button to={`/schedule/com/${item.reportNo}`} color>
+                  Upload
+                </Button>
+                <UpdateB onClick={() => handleClick(item.id)}>
+                  Reschedule
+                </UpdateB>
               </ButtonContainer>
             )}
           </Item>
@@ -43,7 +47,7 @@ const List = ({ events, handleClick }) => {
 export default List;
 
 const Container = styled.div`
-  width: 350px;
+  width: 400px;
   line-hight: 1.5;
   background: linear-gradient(-45deg, white, white, white);
   border-right: 1px solid #d3e2e8;
@@ -58,7 +62,7 @@ const Header = styled.h2`
 
 const ItemsList = styled.ul`
   padding: 10px 10px;
-  align-items: center;
+  align-items: left;
 `;
 
 const Item = styled.li`
@@ -67,9 +71,8 @@ const Item = styled.li`
   border-bottom: 0.1px solid rgba(0, 0, 0, 0.1);
   font-size: 14px;
   text-align: left;
-  justify-content: center;
+  // justify-content: s;
   line-height: 20px;
-  // color: rgba(0, 0, 0, 0.7);
   color: black;
   font-weight: 500;
   display: flex;
@@ -93,6 +96,7 @@ const Button = styled(Link)`
   margin-right: 10px;
   background-color: ${(props) => (props.color ? "green" : "Blue")};
   padding: 10px 15px;
+  color: white;
 `;
 
 const UpdateB = styled.span`
@@ -101,4 +105,5 @@ const UpdateB = styled.span`
   padding: 10px 15px;
   border: none;
   cursor: pointer;
+  color: white;
 `;
