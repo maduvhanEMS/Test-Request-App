@@ -10,6 +10,7 @@ module.exports = (Sequelize, DataTypes) => {
     sample: DataTypes.STRING,
     condition: DataTypes.STRING,
     marking: DataTypes.STRING,
+    details: DataTypes.STRING,
     reportNo: DataTypes.STRING,
     file: DataTypes.STRING,
     filename: DataTypes.STRING,

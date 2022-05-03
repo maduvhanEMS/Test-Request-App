@@ -33,6 +33,7 @@ const ReportsTable = ({ data, setCurrentId, setDisplay }) => {
             <TableHeader>Lot(s)</TableHeader>
             <TableHeader>Created</TableHeader>
             <TableHeader>Report</TableHeader>
+            <TableHeader>Test request PDF</TableHeader>
           </TableTr>
         </thead>
         <tbody>
@@ -83,6 +84,17 @@ const ReportsTable = ({ data, setCurrentId, setDisplay }) => {
                     <Button onClick={() => handleChange(reportNo)}>
                       View reports
                     </Button>
+                  </Tbody>
+                  <Tbody>
+                    <Span>
+                      <ButtonLink
+                        to={`/pdfviewer/${reportNo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View PDF
+                      </ButtonLink>
+                    </Span>
                   </Tbody>
                 </TableTr>
               );
@@ -166,6 +178,10 @@ const PaginationContainer = styled.div`
   width: 100%;
   height: 20px;
   margin: 20px 0;
+`;
+
+const ButtonLink = styled(Link)`
+  color: blue;
 `;
 
 export default ReportsTable;

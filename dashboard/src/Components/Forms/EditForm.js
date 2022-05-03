@@ -166,6 +166,20 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
     "number",
   ];
 
+  const ignoreValuesMetrology = [
+    "id",
+    "createdAt",
+    "updatedAt",
+    "reportNo",
+    "Received",
+    "testRequestId",
+    "file",
+    "filename",
+    "reference_lot",
+    "number",
+    "marking",
+  ];
+
   // useEffect(() => {
   //   if (isCreated) {
   //     dispatch(createTestSchedule(inputValues));
@@ -413,9 +427,12 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
                       {key === "batch_no" &&
                       inputValues?.test_type === "Development"
                         ? ""
-                        : !inputValues?.reportNo?.includes("FS")
-                        ? !ignoreValues.includes(key) && key.toUpperCase()
-                        : !ignoreValuesFlare.includes(key) && key.toUpperCase()}
+                        : inputValues?.reportNo?.includes("FS")
+                        ? !ignoreValuesFlare.includes(key) && key.toUpperCase()
+                        : inputValues?.reportNo?.includes("PM")
+                        ? !ignoreValuesMetrology.includes(key) &&
+                          key.toUpperCase()
+                        : !ignoreValues.includes(key) && key.toUpperCase()}
                     </TableHeader>
                   )
                 )}
@@ -465,8 +482,17 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
                         ) : key === "batch_no" &&
                           inputValues?.test_type === "Development" ? (
                           ""
-                        ) : !inputValues?.reportNo?.includes("FS") ? (
-                          !ignoreValues.includes(key) && (
+                        ) : inputValues?.reportNo?.includes("FS") ? (
+                          !ignoreValuesFlare.includes(key) && (
+                            <input
+                              type="text"
+                              value={value}
+                              name={key}
+                              readOnly
+                            />
+                          )
+                        ) : inputValues?.reportNo?.includes("PM") ? (
+                          !ignoreValuesMetrology.includes(key) && (
                             <input
                               type="text"
                               value={value}
@@ -475,7 +501,7 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
                             />
                           )
                         ) : (
-                          !ignoreValuesFlare.includes(key) && (
+                          !ignoreValues.includes(key) && (
                             <input
                               type="text"
                               value={value}

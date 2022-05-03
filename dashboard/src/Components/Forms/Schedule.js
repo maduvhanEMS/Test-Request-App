@@ -70,9 +70,10 @@ const Schedule = ({ setDisplay }) => {
     dispatch(getAll_requests({ facilityId: initialState.title }));
     dispatch(getTestSchedule());
     dispatch(resetTestsSchedule());
+    dispatch(resetTestsScheduleUpadte());
     if (isUpdated) {
       toast.success("Successfully updated");
-      navigate("/product?page=1");
+      navigate("/product");
       setDisplay("none");
       setFormData("");
       dispatch(resetTestsScheduleUpadte());

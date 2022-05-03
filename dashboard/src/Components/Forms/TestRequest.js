@@ -68,6 +68,8 @@ const TestRequest = ({ data, id, departments, user }) => {
       reportNo = "FS0" + testRequestId;
     } else if (data.toLowerCase().includes("combustible")) {
       reportNo = "CC0" + testRequestId;
+    } else {
+      reportNo = "PM0" + testRequestId;
     }
 
     return reportNo;
@@ -276,34 +278,6 @@ const TestRequest = ({ data, id, departments, user }) => {
     }
   }
 
-  function convert(B) {
-    if (B) {
-      var num = B.split(/[bl]/i);
-      var letters = B.split(/\d+/);
-      let batch;
-      let newNumber;
-      if (num.length > 1) {
-        if (typeof Number(num[1]) === "number") {
-          newNumber = Number(num[1]) + 1;
-        }
-      } else {
-        if (typeof Number(num[0]) === "number") {
-          newNumber = Number(num[0]) + 1;
-        } else {
-          newNumber = num[0];
-        }
-      }
-
-      if (num[2] && letters[1]) {
-        batch = letters[0] + newNumber + letters[1] + num[2].trim();
-      } else {
-        batch = letters[0] + newNumber;
-      }
-
-      return batch;
-    }
-  }
-
   const handleAddClick = (e) => {
     // ? === "number"
     //         ? parseInt(inputValues.test_information[size - 1][option]) + 1
@@ -386,7 +360,7 @@ const TestRequest = ({ data, id, departments, user }) => {
 
       dispatch(createProduct(product_data));
 
-      toast.success(index);
+      toast.success(`${inputValues.other} sucessfully added`);
     }
 
     // if test ID exist

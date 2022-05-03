@@ -10,7 +10,6 @@ const getTestInformation = async (req, res) => {
 };
 
 const getTestInformationById = async (req, res) => {
-  console.log("reportNo", req.params.reportNo);
   try {
     const testinfo = await models.TestInformation.findAll({
       where: { reportNo: req.params.reportNo },
@@ -46,6 +45,8 @@ const addTestInformation = async (req, res) => {
           element["testRequestId"] = testRequestId;
           element["reportNo"] = reportNo;
           element["batch_no"] = element["Batch No."];
+          element["details"] = element["details"];
+          element["sample"] = element["samples"];
           await models.TestInformation.create(element);
         }
         return res.status(200).json({ message: "successfully added" });

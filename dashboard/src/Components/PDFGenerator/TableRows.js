@@ -50,12 +50,23 @@ function TableRows({ test_information, facility_name, development }) {
       <Text style={styles.other}>
         {facility_name.toLowerCase().includes("flare")
           ? item.sample
+          : facility_name.toLowerCase().includes("metrology")
+          ? item.sample
           : item.reference_lot}
       </Text>
-      <Text style={styles.other}>{item.sample}</Text>
-      <Text style={styles.other}>{item.condition}</Text>
+      <Text style={styles.other}>
+        {facility_name.toLowerCase().includes("metrology")
+          ? item.condition
+          : item.sample}
+      </Text>
+      <Text style={styles.other}>
+        {facility_name.toLowerCase().includes("metrology")
+          ? item.details
+          : item.condition}
+      </Text>
     </View>
   ));
+
   return (
     <>
       {rows}
