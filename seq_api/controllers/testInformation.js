@@ -22,7 +22,13 @@ const getTestInformationById = async (req, res) => {
 };
 
 const addTestInformation = async (req, res) => {
-  const { test_information, testRequestId, reportNo, facility_name } = req.body;
+  const {
+    test_information,
+    testRequestId,
+    reportNo,
+    facility_name,
+    lot_number,
+  } = req.body;
   try {
     if (test_information || testRequestId || reportNo) {
       //check for facility nam
@@ -41,12 +47,19 @@ const addTestInformation = async (req, res) => {
 
         return res.status(200).json({ message: "successfully added" });
       } else {
+        let count = 0;
         for (const element of test_information) {
           element["testRequestId"] = testRequestId;
           element["reportNo"] = reportNo;
           element["batch_no"] = element["Batch No."];
           element["details"] = element["details"];
-          element["sample"] = element["samples"];
+          element["sample"] = element["sample"];
+
+          if (lot_number.length > 0) {
+            element["lot_number"] = lot_number[count];
+          }
+
+          count++;
           await models.TestInformation.create(element);
         }
         return res.status(200).json({ message: "successfully added" });

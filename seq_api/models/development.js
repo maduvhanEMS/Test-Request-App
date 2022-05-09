@@ -1,5 +1,6 @@
-module.exports = (Sequelize, DataTypes) => {
-  const Development = Sequelize.define("Development", {
+"use strict";
+module.exports = (sequelize, DataTypes) => {
+  const Development = sequelize.define("Development", {
     safety: {
       type: DataTypes.ARRAY(DataTypes.TEXT),
     },

@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     test_type: DataTypes.STRING,
     reportNo: DataTypes.STRING,
     additional: DataTypes.STRING,
+    closed_vessel: DataTypes.STRING,
     products: DataTypes.ARRAY(DataTypes.TEXT),
     tests: DataTypes.ARRAY(DataTypes.STRING),
     status: {

@@ -42,7 +42,9 @@ function TableRows({ test_information, facility_name, development }) {
   const rows = test_information?.map((item) => (
     <View style={styles.row}>
       <Text style={styles.other}>
-        {item.number > 0 ? item.description + item.number : item.description}
+        {item.lot_number !== "null"
+          ? item.description + " " + item.lot_number
+          : item.description}
       </Text>
       {development !== "Development" && (
         <Text style={styles.other}>{item.batch_no}</Text>

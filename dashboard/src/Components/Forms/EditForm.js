@@ -140,6 +140,8 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
     "testRequestId",
     "file",
     "filename",
+    "details",
+    "marking",
   ];
   const ignoreValuesCC = [
     "id",
@@ -151,6 +153,8 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
     "file",
     "filename",
     "CC_type",
+    "details",
+    "lot_number",
   ];
 
   const ignoreValuesFlare = [
@@ -164,6 +168,8 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
     "filename",
     "reference_lot",
     "number",
+    "details",
+    "lot_number",
   ];
 
   const ignoreValuesMetrology = [
@@ -178,6 +184,8 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
     "reference_lot",
     "number",
     "marking",
+    "details",
+    "lot_number",
   ];
 
   // useEffect(() => {
@@ -320,7 +328,10 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
               <label htmlFor="expected_date"> Results Expected</label>
               <input
                 type="date"
-                value={inputValues?.expected_date}
+                value={
+                  inputValues?.testSchedule?.length > 0 &&
+                  inputValues?.testSchedule[0].expected_date
+                }
                 id="expected_date"
                 readOnly
               />
@@ -468,16 +479,6 @@ const EditTestForm = ({ data, test, id, departments, user }) => {
                               <option value="SL">Sub Lot</option>
                               <option value="Final Lot">Final Lot</option>
                             </select>
-                            {inputValues?.test_information[index][key] ===
-                              "Final Lot" && (
-                              <input
-                                type="text"
-                                placeholder="Lot number"
-                                name="final_lot"
-                                min="0"
-                                readOnly
-                              />
-                            )}
                           </div>
                         ) : key === "batch_no" &&
                           inputValues?.test_type === "Development" ? (

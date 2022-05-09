@@ -4,6 +4,10 @@ import moment from "moment";
 import { Link } from "react-router-dom";
 import PaginationFront from "../Pagination/PaginationFront";
 import { useSortableData } from "../utils/useSortableData";
+import SearchPopUp from "../Modal_form/SearchPopUp";
+import { useFiltableData } from "../utils/useFilterSelect";
+import { BiSearch } from "react-icons/bi";
+import { RiFilterOffFill, RiFilterOffLine } from "react-icons/ri";
 
 let PageSize = 10;
 
@@ -11,18 +15,40 @@ const Table = ({ data, currentUser }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const { items, requestSort, sortConfig } = useSortableData(data);
+  const [tabData, setTabData] = useState([]);
+  const [searchText, setSearchText] = useState("");
+
+  // filter the data
+  // useEffect(() => {
+  //   const filtered = items.filter((item) =>
+  //     item?.testSchedule?.length > 0
+  //       ? item?.testSchedule[0].status !== "Completed"
+  //       : item
+  //   );
+
+  //   setTabData(filtered);
+  // }, [items]);
+
+  const {
+    requestFilter,
+    uniqueItems,
+    filteredItems,
+    searchButton,
+    configDisplay,
+    filterConfig,
+  } = useFiltableData(data);
 
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PageSize;
     const lastPageIndex = firstPageIndex + PageSize;
-    return items
+    return filteredItems
       ?.filter((item) =>
         item?.testSchedule?.length > 0
           ? item?.testSchedule[0].status !== "Completed"
           : item
       )
       .slice(firstPageIndex, lastPageIndex);
-  }, [currentPage, items]);
+  }, [currentPage, filteredItems]);
 
   const Color = (status) => {
     if (status === "Completed") {
@@ -47,6 +73,17 @@ const Table = ({ data, currentUser }) => {
     return sortConfig.key === name ? sortConfig.direction : undefined;
   };
 
+  const getDisplayFor = (name) => {
+    if (!filterConfig) {
+      return;
+    }
+    return filterConfig.column === name ? filterConfig.display : "none";
+  };
+
+  const handleClick = (value) => {
+    setSearchText(value);
+  };
+
   return (
     <Container>
       <TableContainer>
@@ -58,12 +95,44 @@ const Table = ({ data, currentUser }) => {
                 onClick={() => requestSort("reportNo")}
                 className={getClassNamesFor("reportNo")}
               >
-                Report Number{" "}
+                Report Number
               </button>
             </TableHeader>
-            <TableHeader>Test Type</TableHeader>
+            <TableHeader>
+              <button onClick={() => configDisplay("reportNo")}>
+                Test Type
+                <BiSearch />
+              </button>
+              <SearchPopUp
+                display={getDisplayFor("reportNo")}
+                configDisplay={configDisplay}
+                setSearchText={setSearchText}
+                handleClick={handleClick}
+                search
+                searchButton={searchButton}
+                column="reportNo"
+                requestFilter={requestFilter}
+                items={uniqueItems("reportNo")}
+              />
+            </TableHeader>
             <TableHeader>Requestor</TableHeader>
-            <TableHeader>Product Name</TableHeader>
+            <TableHeader>
+              <button onClick={() => configDisplay("products")}>
+                Product Name
+                <BiSearch />
+              </button>
+              <SearchPopUp
+                display={getDisplayFor("products")}
+                configDisplay={configDisplay}
+                setSearchText={setSearchText}
+                handleClick={handleClick}
+                search
+                searchButton={searchButton}
+                column="products"
+                requestFilter={requestFilter}
+                items={uniqueItems("products")}
+              />
+            </TableHeader>
             <TableHeader>Test(s)</TableHeader>
             <TableHeader>
               <button
@@ -179,7 +248,7 @@ const Table = ({ data, currentUser }) => {
         <PaginationFront
           className="pagination-bar"
           currentPage={currentPage}
-          totalCount={currentTableData?.length}
+          totalCount={tabData.length}
           pageSize={PageSize}
           onPageChange={(page) => setCurrentPage(page)}
         />

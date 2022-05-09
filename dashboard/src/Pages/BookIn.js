@@ -82,7 +82,6 @@ const BookIn = () => {
 
   return (
     <Container>
-      {/* <TopSecton data="BookIn" /> */}
       <div
         style={{
           display: "flex",

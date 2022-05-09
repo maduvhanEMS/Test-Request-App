@@ -8,6 +8,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
     borderWidth: 1,
     borderColor: "black",
+    minHeight: 20,
   },
 
   container: {

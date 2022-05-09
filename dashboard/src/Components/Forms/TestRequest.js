@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { BiMinus, BiPlus } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import {
   get_ID,
@@ -42,6 +42,8 @@ const TestRequest = ({ data, id, departments, user }) => {
   const [safety, setSafety] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [check, setCheck] = useState(false);
+  const [checkTests, setCheckTests] = useState(false);
+  const [checkInfo, setCheckInfo] = useState(false);
 
   const {
     register,
@@ -50,14 +52,12 @@ const TestRequest = ({ data, id, departments, user }) => {
   } = useForm();
 
   const dispatch = useDispatch();
-  const params = useParams();
-  const currentId = params.testRequestId;
+  const navigate = useNavigate();
 
   const { testID } = useSelector((state) => state.testRequest);
   const { isCreated } = useSelector((state) => state.testRequest);
 
   const generateReportNo = (data, testRequestId) => {
-    console.log(data);
     let reportNo;
     // create report number
     if (data.toLowerCase().includes("closed")) {
@@ -95,42 +95,9 @@ const TestRequest = ({ data, id, departments, user }) => {
     exp_class: [],
     group: [],
     scientist: "",
+    lot_number: [],
+    closed_vessel: "",
   });
-
-  useEffect(() => {
-    // update product name
-    if (inputValues?.products.length > 0) {
-      const jsonData = data?.header[0]?.name?.map((item) => JSON.parse(item));
-      const headers = jsonData?.map((item) => item.headerName);
-      let prod = [];
-
-      for (var i = 0; i < inputValues?.products.length; i++) {
-        let product =
-          inputValues?.products[i] === "Other"
-            ? inputValues.other
-            : inputValues?.products[i];
-        const newHeaders = headers.reduce(
-          // eslint-disable-next-line no-loop-func
-          (options, option) => ({
-            ...options,
-            [option]:
-              option === "reference_lot"
-                ? product
-                : option === "number"
-                ? 0
-                : "",
-          }),
-          {}
-        );
-        prod.push(newHeaders);
-      }
-
-      setInputValues((prevState) => ({
-        ...prevState,
-        test_information: prod,
-      }));
-    }
-  }, [inputValues.other, data, inputValues.products]);
 
   useEffect(() => {
     if (data) {
@@ -187,6 +154,7 @@ const TestRequest = ({ data, id, departments, user }) => {
           safety: safetyUpdate,
           products: [],
         }));
+        navigate(`/testrequest?facility=${data?.facility_name}`);
       } else {
         setInputValues((prevState) => ({
           ...prevState,
@@ -199,18 +167,79 @@ const TestRequest = ({ data, id, departments, user }) => {
 
     dispatch(get_ID());
     dispatch(reset());
-  }, [id, data, dispatch]);
+  }, [id, data, dispatch, navigate]);
 
   useEffect(() => {
-    if (inputValues.test_information.length > 0) {
-      setIsLoading(false);
+    // update product name
+    if (inputValues?.products.length > 0) {
+      const jsonData = data?.header[0]?.name?.map((item) => JSON.parse(item));
+      const headers = jsonData?.map((item) => item.headerName);
+      let prod = [];
+
+      for (var i = 0; i < inputValues?.products.length; i++) {
+        let product =
+          inputValues?.products[i] === "Other"
+            ? inputValues.other
+            : inputValues?.products[i];
+        const newHeaders = headers.reduce(
+          // eslint-disable-next-line no-loop-func
+          (options, option, index) => ({
+            ...options,
+            [option]:
+              option === "reference_lot"
+                ? product
+                : option === "number"
+                ? 0
+                : "",
+          }),
+          {}
+        );
+        prod.push(newHeaders);
+      }
+
+      setInputValues((prevState) => ({
+        ...prevState,
+        test_information: prod,
+      }));
     }
-  }, [inputValues.test_information.length]);
+  }, [inputValues.other, data, inputValues.products]);
+
+  useEffect(() => {
+    if (inputValues?.test_information?.length > 0) {
+      setIsLoading(false);
+      for (var i = 0; i < inputValues.test_information.length; i++) {
+        if (!Object.values(inputValues.test_information[i]).includes("")) {
+          setCheckInfo(true);
+        } else {
+          setCheckInfo(false);
+        }
+      }
+    }
+    let count = 0;
+    for (var j = 0; j < inputValues?.tests?.length; j++) {
+      if (Object.values(inputValues.tests[j])[0]) {
+        count++;
+      }
+    }
+
+    if (count > 0) {
+      setCheckTests(true);
+    } else {
+      setCheckTests(false);
+    }
+  }, [inputValues.test_information, inputValues?.tests]);
+
+  //check if test has been selected
 
   const handleChange = (event) => {
     const { name } = event.target;
     const value = event.target.value;
-    setInputValues({ ...inputValues, [name]: value });
+
+    if (name === "lot_number") {
+      setInputValues({ ...inputValues, [name]: name.push(value) });
+    } else {
+      setInputValues({ ...inputValues, [name]: value });
+    }
   };
 
   const handleCheckBoxes = (event, index) => {
@@ -279,9 +308,6 @@ const TestRequest = ({ data, id, departments, user }) => {
   }
 
   const handleAddClick = (e) => {
-    // ? === "number"
-    //         ? parseInt(inputValues.test_information[size - 1][option]) + 1
-    //         : inputValues.test_information[size - 1][option],
     e.preventDefault();
     if (inputValues?.test_information[0].description !== "") {
       setCheck(false);
@@ -303,6 +329,10 @@ const TestRequest = ({ data, id, departments, user }) => {
         ...prevState,
         test_information: [...prevState.test_information, newHeaders],
       }));
+      setInputValues((prevState) => ({
+        ...prevState,
+        lot_number: [...prevState.lot_number, prevState.lot_number[size - 1]],
+      }));
     } else {
       setCheck(true);
     }
@@ -312,8 +342,11 @@ const TestRequest = ({ data, id, departments, user }) => {
     e.preventDefault();
     let list = { ...inputValues };
     let info = [...list.test_information];
+    let lot_no = [...list.lot_number];
     info.splice(i, 1);
+    lot_no.splice(i, 1);
     list.test_information = info;
+    list.lot_number = lot_no;
 
     setInputValues(list);
   };
@@ -321,7 +354,7 @@ const TestRequest = ({ data, id, departments, user }) => {
   useEffect(() => {
     if (isCreated) {
       dispatch(createTestSchedule(inputValues));
-      if (inputValues.facility_name.toLowerCase().includes("combustible")) {
+      if (inputValues?.facility_name?.toLowerCase()?.includes("combustible")) {
         dispatch(createCCTestInformation(inputValues));
       } else {
         dispatch(createTestInformation(inputValues));
@@ -340,8 +373,35 @@ const TestRequest = ({ data, id, departments, user }) => {
         `Report Number ${inputValues.reportNo} Succesfully created`
       );
       dispatch(resetCreated());
+
+      setInputValues({
+        requestorId: user?.id,
+        products: [],
+        productId: 1,
+        departmentId: "",
+        test_type: "",
+        facility_name: data?.facility_name,
+        facilityId: data?.id,
+        test_description: "",
+        additional: "",
+        tests: [],
+        test_information: [],
+        safety: [],
+        expected_date: "",
+        other: "",
+        product_specification: "",
+        cost_center: "",
+        exp_class: [],
+        group: [],
+        scientist: "",
+        lot_number: [],
+        closed_vessel: "",
+      });
+      dispatch(get_ID());
     }
-  }, [isCreated, inputValues, dispatch, user]);
+  }, [isCreated, inputValues, dispatch, user, data]);
+
+  console.log(inputValues);
 
   const onSubmit = (data) => {
     // check if other is selected
@@ -375,7 +435,6 @@ const TestRequest = ({ data, id, departments, user }) => {
     const reportNo = generateReportNo(inputValues.facility_name, testRequestId);
     const title = reportNo + " - " + inputValues.products.join(" & ");
 
-    console.log(reportNo);
     // information required to create a schedule
     // update invalues to include reportNo, title and testRequets id
     inputValues["reportNo"] = reportNo;
@@ -385,7 +444,29 @@ const TestRequest = ({ data, id, departments, user }) => {
   };
 
   const handleClear = () => {
-    // setInputValues(initialState);
+    setInputValues({
+      requestorId: user?.id,
+      products: [],
+      productId: 1,
+      departmentId: "",
+      test_type: "",
+      facility_name: data?.facility_name,
+      facilityId: data?.id,
+      test_description: "",
+      additional: "",
+      tests: [],
+      test_information: [],
+      safety: [],
+      expected_date: "",
+      other: "",
+      product_specification: "",
+      cost_center: "",
+      exp_class: [],
+      group: [],
+      scientist: "",
+      lot_number: [],
+      closed_vessel: "",
+    });
   };
 
   const handleArrayChange = (e, index) => {
@@ -394,6 +475,10 @@ const TestRequest = ({ data, id, departments, user }) => {
     if (name.startsWith("exp_class")) {
       const classData = { ...inputValues };
       classData.exp_class[index] = value;
+      setInputValues(classData);
+    } else if (name.startsWith("lot_number")) {
+      const classData = { ...inputValues };
+      classData.lot_number[index] = value;
       setInputValues(classData);
     } else {
       const classData = { ...inputValues };
@@ -693,8 +778,8 @@ const TestRequest = ({ data, id, departments, user }) => {
             >
               <label>Aleady Fired in the Closed Vessel? </label>
               <select
-                id="Department"
-                {...register("closedVessel", {
+                value={inputValues.closed_vessel}
+                {...register("closed_vessel", {
                   required: true,
                   onChange: (e) => {
                     handleChange(e);
@@ -716,12 +801,12 @@ const TestRequest = ({ data, id, departments, user }) => {
                 return (
                   <TableHeader key={key + index}>
                     {JSON.parse(key).headerName === "Batch No." &&
-                    !inputValues.facility_name
-                      .toLowerCase()
-                      .includes("flare") &&
+                    !inputValues?.facility_name
+                      ?.toLowerCase()
+                      ?.includes("flare") &&
                     inputValues?.test_type === "Development"
                       ? ""
-                      : JSON.parse(key).headerName.toUpperCase()}
+                      : JSON.parse(key)?.headerName?.toUpperCase()}
                   </TableHeader>
                 );
               })}
@@ -747,7 +832,7 @@ const TestRequest = ({ data, id, departments, user }) => {
                               onChange={(e) => handleInputChange(e, index)}
                               name={key}
                             >
-                              <option>Please select</option>
+                              <option value="">Please select</option>
                               <option value="ML">Mixer Load</option>
                               <option value="SL">Sub Lot</option>
                               <option value="Final Lot">Final Lot</option>
@@ -756,13 +841,12 @@ const TestRequest = ({ data, id, departments, user }) => {
                               "Final Lot" && (
                               <input
                                 type="text"
+                                value={inputValues.lot_number[index]}
                                 placeholder="Lot number"
-                                name="final_lot"
-                                min="0"
-                                {...register("lot_number", {
+                                {...register(`lot_number${index}`, {
                                   required: true,
                                   onChange: (e) => {
-                                    handleChange(e);
+                                    handleArrayChange(e, index);
                                   },
                                 })}
                               />
@@ -780,7 +864,7 @@ const TestRequest = ({ data, id, departments, user }) => {
                                   : "none"
                               }`}`,
                             }}
-                            placeholder="ML100"
+                            placeholder="ML100/Leg 100/SL125"
                             type="text"
                             value={value}
                             name={key}
@@ -843,7 +927,7 @@ const TestRequest = ({ data, id, departments, user }) => {
               },
             })}
           ></textarea>
-          <FieldControl>
+          {/* <FieldControl>
             <input
               type="file"
               placeholder="upload"
@@ -855,8 +939,8 @@ const TestRequest = ({ data, id, departments, user }) => {
               }}
               {...register("file", { onChange: (e) => handleChange(e) })}
             />
-          </FieldControl>
-          {inputValues?.file && inputValues?.file.name}
+          </FieldControl> */}
+          {/* {inputValues?.file && inputValues?.file.name} */}
         </Additional>
         {/* Think of creating a separate form Maduvha */}
         {inputValues?.test_type === "Development" && (
@@ -997,76 +1081,19 @@ const TestRequest = ({ data, id, departments, user }) => {
             </FieldControl>
           </>
         )}
-        <FieldControl
-          style={{
-            padding: "20px",
-            left: "0",
-            justifyContent: "space-between",
-          }}
-        >
-          <label
-            style={{
-              minWidth: "350px",
-              fontSize: "16px",
-              textAlign: "left",
-            }}
-          >
-            Test Officer <span style={{ color: "red" }}>*</span>
-          </label>
-          <select
-            value={inputValues?.test_officer}
-            {...register("test_officer", {
-              onChange: (e) => {
-                handleChange(e);
-              },
-            })}
-          >
-            <option value="">Please select</option>
-            <option value="maduvha">Maduvha</option>
-            <option value="maduvha">Nemadandila</option>
-          </select>
-        </FieldControl>
-        {currentId && (
-          <FieldControl
-            style={{
-              padding: "20px",
-              left: "0",
-              alignItems: "center",
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "30px",
-            }}
-          >
-            <label style={{ marginRight: "20px" }}>
-              Approve/Reject: <span style={{ color: "red" }}>*</span>{" "}
-            </label>
 
-            <select
-              type="checkbox"
-              {...register("status", {
-                required: true,
-                onChange: (e) => handleChange(e),
-              })}
-            >
-              <option value="">Please select</option>
-              <option value="Rejected">Reject</option>
-              <option value="In Progress">Approved</option>
-            </select>
-          </FieldControl>
-        )}
-
-        {user.username === "Guest" ? (
-          "Please login to submit the form"
-        ) : (
-          <>
-            <Button type="submit">Submit</Button>
-            <Button type="reset" onClick={handleClear} clear>
-              Clear
-            </Button>
-          </>
-        )}
+        {user.username === "Guest"
+          ? "Please login to submit the form"
+          : checkInfo &&
+            checkTests && (
+              <div style={{ marginTop: "20px" }}>
+                <Button type="submit">Submit</Button>
+                <Button type="reset" onClick={handleClear} clear>
+                  Clear
+                </Button>
+              </div>
+            )}
       </form>
-      {JSON.stringify(inputValues)}
     </Container>
   );
 };

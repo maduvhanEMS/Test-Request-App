@@ -1,9 +1,10 @@
-module.exports = (Sequelize, DataTypes) => {
-  const TestInformation = Sequelize.define("TestInformation", {
+module.exports = (sequelize, DataTypes) => {
+  const TestInformation = sequelize.define("TestInformation", {
     description: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    lot_number: DataTypes.STRING,
     batch_no: DataTypes.STRING,
     number: DataTypes.INTEGER,
     reference_lot: DataTypes.STRING,

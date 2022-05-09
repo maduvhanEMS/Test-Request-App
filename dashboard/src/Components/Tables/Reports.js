@@ -3,22 +3,46 @@ import styled from "styled-components";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import PaginationFront from "../Pagination/PaginationFront";
+import { RiFilterOffFill, RiFilterOffLine } from "react-icons/ri";
+import { useFiltableData } from "../utils/useFilterSelect";
+import SearchPopUp from "../Modal_form/SearchPopUp";
+import { BiSearch } from "react-icons/bi";
 
 let PageSize = 10;
 
 const ReportsTable = ({ data, setCurrentId, setDisplay }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [open, setOpen] = useState(0);
+  const [searchText, setSearchText] = useState("");
+
+  const {
+    requestFilter,
+    uniqueItems,
+    filteredItems,
+    searchButton,
+    configDisplay,
+    filterConfig,
+  } = useFiltableData(data);
 
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PageSize;
     const lastPageIndex = firstPageIndex + PageSize;
-    return data?.slice(firstPageIndex, lastPageIndex);
-  }, [currentPage]);
+    return filteredItems.slice(firstPageIndex, lastPageIndex);
+  }, [currentPage, filteredItems]);
 
   const handleChange = (id) => {
     setDisplay("block");
     setCurrentId(id);
+  };
+
+  const handleClick = (value) => {
+    setSearchText(value);
+  };
+
+  const getDisplayFor = (name) => {
+    if (!filterConfig) {
+      return;
+    }
+    return filterConfig.column === name ? filterConfig.display : "none";
   };
 
   return (
@@ -26,9 +50,54 @@ const ReportsTable = ({ data, setCurrentId, setDisplay }) => {
       <TableContainer>
         <thead>
           <TableTr>
-            <TableHeader>Test ID</TableHeader>
-            <TableHeader>Product Name</TableHeader>
-            <TableHeader>Section</TableHeader>
+            <TableHeader>
+              <button onClick={() => configDisplay("reportNo")}>
+                Test ID <BiSearch />
+              </button>
+              <SearchPopUp
+                display={getDisplayFor("reportNo")}
+                configDisplay={configDisplay}
+                setSearchText={setSearchText}
+                handleClick={handleClick}
+                search
+                searchButton={searchButton}
+                column="reportNo"
+                requestFilter={requestFilter}
+                items={uniqueItems("reportNo")}
+              />
+            </TableHeader>
+            <TableHeader>
+              <button onClick={() => configDisplay("products")}>
+                Product Name <BiSearch />
+              </button>
+              <SearchPopUp
+                display={getDisplayFor("products")}
+                configDisplay={configDisplay}
+                setSearchText={setSearchText}
+                handleClick={handleClick}
+                search
+                searchButton={searchButton}
+                column="products"
+                requestFilter={requestFilter}
+                items={uniqueItems("products")}
+              />
+            </TableHeader>
+            <TableHeader>
+              <button onClick={() => configDisplay("facility_name")}>
+                Section <RiFilterOffFill />
+              </button>
+              <SearchPopUp
+                display={getDisplayFor("facility_name")}
+                configDisplay={configDisplay}
+                setSearchText={setSearchText}
+                handleClick={handleClick}
+                filter
+                column="facility_name"
+                secondKey="test"
+                requestFilter={requestFilter}
+                items={uniqueItems("facility_name", "test")}
+              />
+            </TableHeader>
             <TableHeader>Test(s)</TableHeader>
             <TableHeader>Lot(s)</TableHeader>
             <TableHeader>Created</TableHeader>
@@ -41,11 +110,11 @@ const ReportsTable = ({ data, setCurrentId, setDisplay }) => {
             currentTableData?.map((info, index) => {
               const {
                 test_information,
-                product,
                 tests,
                 test,
                 createdAt,
                 reportNo,
+                products,
               } = info;
               let modifiedTest;
               const testsDescrip = tests?.map((item) => JSON.parse(item));
@@ -73,7 +142,7 @@ const ReportsTable = ({ data, setCurrentId, setDisplay }) => {
               return (
                 <TableTr key={index}>
                   <Tbody>{reportNo}</Tbody>
-                  <Tbody>{product.product_name}</Tbody>
+                  <Tbody>{products.join(" & ")}</Tbody>
                   <Tbody>{test.facility_name}</Tbody>
                   <Tbody>{modifiedTest}</Tbody>
                   <Tbody style={{ maxWidth: "100px" }}>

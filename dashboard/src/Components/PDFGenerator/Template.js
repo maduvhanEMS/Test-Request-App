@@ -76,6 +76,16 @@ function Template({ data, safetyData, products }) {
           products={products}
         />
         <TestInformation tests={data?.tests?.map((item) => JSON.parse(item))} />
+        {data?.closed_vessel ? (
+          <View style={{ marginTop: "10px" }}>
+            <Text>
+              Already fired in the closed vessel ? {data?.closed_vessel}
+            </Text>
+          </View>
+        ) : (
+          <View></View>
+        )}
+
         <View style={styles.row}>
           <Table
             test_information={data?.test_information}

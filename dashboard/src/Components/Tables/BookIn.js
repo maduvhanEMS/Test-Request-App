@@ -15,6 +15,7 @@ import {
 import ModalForm from "../Modal_form/ModalForm";
 import ScheduleModal from "../Forms/ScheduleModal";
 import { updateCCTestInformation } from "../../features/CCTest_information/CCTest_informationSlice";
+import { BiMinus, BiPlus } from "react-icons/bi";
 
 const BookInTable = ({ data, handleClick }) => {
   const { register } = useForm();
@@ -36,6 +37,8 @@ const BookInTable = ({ data, handleClick }) => {
   const { testInfo, isLoading } = useSelector(
     (state) => state.singleTestRequest
   );
+
+  console.log(testInfo);
 
   const { isUpdated } = useSelector((state) => state.schedule);
 
@@ -63,16 +66,21 @@ const BookInTable = ({ data, handleClick }) => {
 
     setTestInfotmation(
       descriptions?.reduce(
-        (options, option) => [
+        (options, option, index) => [
           ...options,
           {
-            [option]: false,
+            [option]:
+              testInfo?.test_information[index].Received === "true"
+                ? true
+                : false,
           },
         ],
         []
       )
     );
   }, [testInfo]);
+
+  console.log(testInformation);
 
   const handleChange = (e, i) => {
     const { name } = e.target;
@@ -126,13 +134,15 @@ const BookInTable = ({ data, handleClick }) => {
     let count = 0;
     for (var i = 0; i <= testInformation?.length; i++) {
       for (var name in testInformation[i]) {
-        if (testInformation[i][name] === true) {
+        if (testInformation[i][name] === false) {
           count++;
         }
       }
     }
-    if (count > 0) {
+    if (count === 0) {
       setTestStatus("Booked In");
+    } else {
+      setTestStatus("Received");
     }
   }, [testInformation]);
 
@@ -215,8 +225,6 @@ const BookInTable = ({ data, handleClick }) => {
           toast.error("You haven't received all the Samples");
           setText(false);
           setDisplay("block");
-
-          console.log(count);
         } else {
           setDisplay("block");
           setText(true);
@@ -289,29 +297,30 @@ const BookInTable = ({ data, handleClick }) => {
         {testInfo?.test_information?.length > 0 && (
           <tbody>
             {testInfo?.test_information?.map((item, index) => {
-              const { description, number, batch_no, sample, id } = item;
+              const { description, batch_no, sample, id, lot_number } = item;
+              // console.log(testInformation[index][id]);
 
               return (
                 <TableTr key={index}>
                   <Tbody>
                     {testInfo?.test_type === "Development"
                       ? description
-                      : number
-                      ? description + number
+                      : lot_number
+                      ? "FL" + "-" + lot_number + " " + batch_no
                       : batch_no}
                   </Tbody>
                   <Tbody>{sample}</Tbody>
                   <Tbody>{tests()}</Tbody>
                   <Tbody> {testInfo?.test.facility_name}</Tbody>
+
                   <Tbody>
                     <form>
                       <input
                         type="checkbox"
+                        name={id}
                         checked={
                           testInformation?.length > 0 &&
                           testInformation[index][id]
-                            ? testInformation[index][id]
-                            : false
                         }
                         {...register(`${id}`, {
                           onChange: (e) => {
