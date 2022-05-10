@@ -36,7 +36,7 @@ const Table = ({ data, currentUser }) => {
     searchButton,
     configDisplay,
     filterConfig,
-  } = useFiltableData(data);
+  } = useFiltableData(items);
 
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PageSize;
@@ -248,7 +248,7 @@ const Table = ({ data, currentUser }) => {
         <PaginationFront
           className="pagination-bar"
           currentPage={currentPage}
-          totalCount={tabData.length}
+          totalCount={filteredItems.length}
           pageSize={PageSize}
           onPageChange={(page) => setCurrentPage(page)}
         />

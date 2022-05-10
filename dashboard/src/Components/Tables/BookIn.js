@@ -22,10 +22,12 @@ const BookInTable = ({ data, handleClick }) => {
   const [status, setTestStatus] = useState(data?.status);
   const [error, setError] = useState(false);
   const [move_ticket, setMoveTicket] = useState("");
+  const [f_move_ticket, setFMoveTicket] = useState([]);
   const [display, setDisplay] = useState("none");
   const [scheduleDisplay, setScheduleDisplay] = useState("none");
   const [text, setText] = useState(false);
   const [check, setCheck] = useState(false);
+  let batches = [];
 
   const params = useParams();
   const reportNo = params.bookId;
@@ -54,25 +56,52 @@ const BookInTable = ({ data, handleClick }) => {
 
   useEffect(() => {
     let descriptions;
+    let batch_no = [];
+    let id_no = [];
     if (testInfo?.reportNo?.includes("CC")) {
       descriptions = testInfo?.CC_info?.map((item) => {
+        if (batch_no.indexOf(item.batch_no) === -1) {
+          batch_no.push(item.batch_no);
+          id_no.push(item.id);
+        }
         return item.id;
       });
     } else {
       descriptions = testInfo?.test_information?.map((item) => {
+        if (batch_no.indexOf(item.batch_no) === -1) {
+          batch_no.push(item.batch_no);
+          id_no.push(item.id);
+        }
         return item.id;
       });
     }
+
+    //remove undefine
+    console.log(descriptions, id_no);
 
     setTestInfotmation(
       descriptions?.reduce(
         (options, option, index) => [
           ...options,
           {
-            [option]:
-              testInfo?.test_information[index].Received === "true"
-                ? true
-                : false,
+            [option]: !id_no.includes(option)
+              ? true
+              : testInfo?.test_information[index].Received === "true"
+              ? true
+              : false,
+          },
+        ],
+        []
+      )
+    );
+    setFMoveTicket(
+      descriptions?.reduce(
+        (options, option, index) => [
+          ...options,
+          {
+            [option]: testInfo?.test_information[index].move_ticket
+              ? testInfo?.test_information[index].move_ticket
+              : "N/A",
           },
         ],
         []
@@ -178,7 +207,9 @@ const BookInTable = ({ data, handleClick }) => {
         testInformation,
         reportNo: testInfo.reportNo,
         status,
-        move_ticket: move_ticket,
+        move_ticket: f_move_ticket
+          ? f_move_ticket + " & " + move_ticket
+          : move_ticket,
       };
 
       dispatch(updateTestInformation(testData));
@@ -233,7 +264,9 @@ const BookInTable = ({ data, handleClick }) => {
             testInformation,
             reportNo: testInfo.reportNo,
             status,
-            move_ticket: move_ticket,
+            move_ticket: f_move_ticket
+              ? f_move_ticket + " & " + move_ticket
+              : move_ticket,
           };
 
           dispatch(updateTestInformation(testData));
@@ -281,6 +314,9 @@ const BookInTable = ({ data, handleClick }) => {
               <TableHeader>Dry Mass</TableHeader>
               <TableHeader>Section</TableHeader>
               <TableHeader>Received</TableHeader>
+              {f_move_ticket?.length > 0 && (
+                <TableHeader>Move Ticket</TableHeader>
+              )}
             </TableTr>
           ) : (
             <TableTr>
@@ -291,6 +327,9 @@ const BookInTable = ({ data, handleClick }) => {
               <TableHeader>Test(s)</TableHeader>
               <TableHeader>Section</TableHeader>
               <TableHeader>Received</TableHeader>
+              {f_move_ticket?.length > 0 && (
+                <TableHeader>Move Ticket</TableHeader>
+              )}
             </TableTr>
           )}
         </thead>
@@ -298,40 +337,52 @@ const BookInTable = ({ data, handleClick }) => {
           <tbody>
             {testInfo?.test_information?.map((item, index) => {
               const { description, batch_no, sample, id, lot_number } = item;
-              // console.log(testInformation[index][id]);
 
-              return (
-                <TableTr key={index}>
-                  <Tbody>
-                    {testInfo?.test_type === "Development"
-                      ? description
-                      : lot_number
-                      ? "FL" + "-" + lot_number + " " + batch_no
-                      : batch_no}
-                  </Tbody>
-                  <Tbody>{sample}</Tbody>
-                  <Tbody>{tests()}</Tbody>
-                  <Tbody> {testInfo?.test.facility_name}</Tbody>
+              console.log(batches);
+              if (batches.indexOf(batch_no) === -1) {
+                batches.push(batch_no);
 
-                  <Tbody>
-                    <form>
-                      <input
-                        type="checkbox"
-                        name={id}
-                        checked={
-                          testInformation?.length > 0 &&
-                          testInformation[index][id]
-                        }
-                        {...register(`${id}`, {
-                          onChange: (e) => {
-                            handleChange(e, index);
-                          },
-                        })}
-                      />
-                    </form>
-                  </Tbody>
-                </TableTr>
-              );
+                return (
+                  <TableTr key={index}>
+                    <Tbody>
+                      {testInfo?.test_type === "Development"
+                        ? description
+                        : lot_number
+                        ? "FL" + "-" + lot_number + " " + batch_no
+                        : batch_no}
+                    </Tbody>
+                    <Tbody>{sample}</Tbody>
+                    <Tbody>{tests()}</Tbody>
+                    <Tbody> {testInfo?.test.facility_name}</Tbody>
+
+                    <Tbody>
+                      <form>
+                        <input
+                          type="checkbox"
+                          name={id}
+                          checked={
+                            testInformation?.length > 0 &&
+                            testInformation[index][id]
+                          }
+                          {...register(`${id}`, {
+                            onChange: (e) => {
+                              handleChange(e, index);
+                            },
+                          })}
+                        />
+                      </form>
+                    </Tbody>
+                    {f_move_ticket?.length > 0 && (
+                      <Tbody>
+                        {testInformation?.length > 0 &&
+                        testInformation[index][id]
+                          ? f_move_ticket[index].move_ticket
+                          : "N/A"}
+                      </Tbody>
+                    )}
+                  </TableTr>
+                );
+              }
             })}
           </tbody>
         )}

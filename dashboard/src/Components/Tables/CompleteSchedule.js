@@ -16,8 +16,6 @@ const CompleteSchedule = ({ data, id }) => {
 
   const dispatch = useDispatch();
 
-  console.log(data);
-
   useEffect(() => {
     let initialState = [];
     let test_data;
@@ -134,6 +132,7 @@ const CompleteSchedule = ({ data, id }) => {
     const index = formFileData.findIndex((item) => {
       return parseInt(item.id) === parseInt(id);
     });
+
     const { name } = e.target;
     const newFile = [...formFileData];
     const value = e.target.files[0];
@@ -218,7 +217,7 @@ const CompleteSchedule = ({ data, id }) => {
             <TableHeader>Section</TableHeader>
             <TableHeader>Report Type</TableHeader>
             <TableHeader>File(s)</TableHeader>
-            <TableHeader>FileName)</TableHeader>
+            <TableHeader>FileName</TableHeader>
           </TableTr>
         </thead>
         <tbody>

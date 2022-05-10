@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     marking: DataTypes.STRING,
     details: DataTypes.STRING,
     reportNo: DataTypes.STRING,
+    move_ticket: DataTypes.STRING,
     file: DataTypes.STRING,
     filename: DataTypes.STRING,
     Received: {
